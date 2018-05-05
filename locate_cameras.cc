@@ -82,10 +82,8 @@ int main(int argc, char** argv) {
             std::cerr << "Error reading dist_coeffs in file " << argv[i] << std::endl;
             continue;
         }
-	device.set(CV_CAP_PROP_FRAME_WIDTH, 1080);
-	device.set(CV_CAP_PROP_FRAME_HEIGHT, 720);
-        //device.set(CV_CAP_PROP_FRAME_WIDTH, 500);
-        //device.set(CV_CAP_PROP_FRAME_HEIGHT, 250);
+	device.set(CV_CAP_PROP_FRAME_WIDTH, 720);
+	device.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
         device.set(CV_CAP_PROP_FPS, 30);
 
         devices.push_back(device);
@@ -109,7 +107,18 @@ int main(int argc, char** argv) {
     td->refine_pose = 0;
 
     int key = 0;
+    float max_X;
+    float max_Y;
+    float min_X;
+    float min_Y;
+    std::ifstream infile("crop.calib");
+    infile >> min_X;
+    infile >> min_Y;
+    infile >> max_X;
+    infile >> max_Y;
+    infile.close();
     Mat frame, gray;
+    Mat cframe, img;
 
     while (key != 27) { // Quit on escape keypress
         for (size_t i = 0; i < devices.size(); i++) {
@@ -117,7 +126,10 @@ int main(int argc, char** argv) {
                 continue;
             }
 
-            devices[i] >> frame;
+            devices[i] >> cframe;
+            img = cframe.clone();
+            Rect roi = Rect(floor(min_X), floor(min_Y), floor(max_X - min_X), floor(max_Y - min_Y));
+	    frame = img(roi);
             cvtColor(frame, gray, COLOR_BGR2GRAY);
             image_u8_t im = {
                 .width = gray.cols,
@@ -240,11 +252,6 @@ int main(int argc, char** argv) {
 
 
             zarray_destroy(detections);
-            //Mat roiImg, img;
-            //img = frame.clone();
-            //Rect roi = Rect(45, 30, 320, 180);
-            //roiImg = img(roi);
-            //imshow(std::to_string(i), roiImg);
             imshow(std::to_string(i), frame);
         }
 

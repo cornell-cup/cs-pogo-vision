@@ -102,10 +102,10 @@ int main(int argc, char** argv) {
             continue;
         }
 
-        device.set(CV_CAP_PROP_FRAME_WIDTH, 1280);
-        device.set(CV_CAP_PROP_FRAME_HEIGHT, 720);
-        //device.set(CV_CAP_PROP_FRAME_WIDTH, 500);
-        //device.set(CV_CAP_PROP_FRAME_HEIGHT, 250);
+        //device.set(CV_CAP_PROP_FRAME_WIDTH, 1280);
+        //device.set(CV_CAP_PROP_FRAME_HEIGHT, 720);
+        device.set(CV_CAP_PROP_FRAME_WIDTH, 720);
+        device.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
         device.set(CV_CAP_PROP_FPS, 30);
         devices.push_back(device);
         device_ids.push_back(id);
@@ -126,7 +126,18 @@ int main(int argc, char** argv) {
     td->refine_decode = 0;
     td->refine_pose = 0;
     int key = 0;
+    float max_X;
+    float max_Y;
+    float min_X;
+    float min_Y;
+    std::ifstream infile("crop.calib");
+    infile >> min_X;
+    infile >> min_Y;
+    infile >> max_X;
+    infile >> max_Y;
+    infile.close();
     Mat frame, gray;
+    Mat cframe, img;
     char postDataBuffer[100];
 
 
@@ -141,7 +152,10 @@ int main(int argc, char** argv) {
                 continue;
             }
 
-            devices[i] >> frame;
+            devices[i] >> cframe;
+            img = cframe.clone();
+            Rect roi = Rect(floor(min_X), floor(min_Y), floor(max_X - min_X), floor(max_Y - min_Y));
+	    frame = img(roi);
             cvtColor(frame, gray, COLOR_BGR2GRAY);
             image_u8_t im = {
                 .width = gray.cols,
@@ -150,10 +164,10 @@ int main(int argc, char** argv) {
                 .buf = gray.data
             };
 
-			zarray_t* detections = apriltag_detector_detect(td, &im);            
-			vector<Point2f> img_points(4);
-         	vector<Point3f> obj_points(4);
-           	Mat rvec(3, 1, CV_64FC1);
+	    zarray_t* detections = apriltag_detector_detect(td, &im);            
+	    vector<Point2f> img_points(4);
+            vector<Point3f> obj_points(4);
+            Mat rvec(3, 1, CV_64FC1);
             Mat tvec(3, 1, CV_64FC1);
 
             printf("~~~~~~~~~~~~~ Camera %d ~~~~~~~~~~~~\n", (int)i);

@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
         int id = atoi(argv[i]);
         VideoCapture device(id);
         if (device.isOpened()) {
-            device.set(CV_CAP_PROP_FRAME_WIDTH, 640);
+            device.set(CV_CAP_PROP_FRAME_WIDTH, 720);
             device.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
             device.set(CV_CAP_PROP_FPS, 30);
             img_points.push_back(vector<vector<Point2f>>());
@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
             std::cerr << "Failed to open video capture device " << id << std::endl;
         }
     }
-
+    
     // Calibration variables
     Size checkerboard_size(rows, cols);
     vector<Point3f> checkerboard_points;
@@ -52,7 +52,18 @@ int main(int argc, char** argv) {
     }
 
     int key = 0;
+    float max_X;
+    float max_Y;
+    float min_X;
+    float min_Y;
+    std::ifstream infile("crop.calib");
+    infile >> min_X;
+    infile >> min_Y;
+    infile >> max_X;
+    infile >> max_Y;
+    infile.close();
     Mat frame, gray;
+    Mat cframe, img;
     vector<Point2f> corners;
     while (key != 27) { // Quit on escape keypress
         for (size_t i = 0; i < devices.size(); i++) {
@@ -60,8 +71,10 @@ int main(int argc, char** argv) {
                 continue;
             }
 
-            devices[i] >> frame;
-
+            devices[i] >> cframe;
+	    img = cframe.clone();
+            Rect roi = Rect(floor(min_X), floor(min_Y), floor(max_X - min_X), floor(max_Y - min_Y));
+	    frame = img(roi);
             // Detect checkerboards on spacebar
             if (waitKey(1) == 32) {
                 cvtColor(frame, gray, COLOR_BGR2GRAY);
