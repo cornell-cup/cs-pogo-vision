@@ -8,7 +8,9 @@
 #include <opencv2/opencv.hpp>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <vector>
+#include <wiringSerial.h>
 
 using namespace cv;
 using std::vector;
@@ -136,10 +138,13 @@ int main(int argc, char** argv) {
     infile >> max_X;
     infile >> max_Y;
     infile.close();
+    float center_X = (max_X + min_X)/2;
+    float center_Y = (max_Y + min_Y)/2;
+    int fd;
     Mat frame, gray;
     Mat cframe, img;
     char postDataBuffer[100];
-
+    int sOpen = 0;
 
     while (key != 27) { // Quit on escape keypress
 
@@ -181,13 +186,41 @@ int main(int argc, char** argv) {
             Mat genout = Mat(data2,true).reshape(1, 4);
             Mat cameraXYZS = device_transform_matrix[i] * genout;
             printf("coordinates: (%f, %f, %f)\n", cameraXYZS.at<double>(0), cameraXYZS.at<double>(1), cameraXYZS.at<double>(2));
-
+	    char charX[10];
+	    char charY[10];
+	    char data[128];
             for (int j = 0; j < zarray_size(detections); j++) {
 	
                 // Get the ith detection
                 apriltag_detection_t *det;
                 zarray_get(detections, j, &det);
-
+		if ((det->id) == 0){
+		  if ((fd = serialOpen("/dev/ttyACM0", 115200)) < 0){
+    		    fprintf(stderr, "Unable to open serial device: %s\n", strerror (errno));
+		    }
+		  else{
+		    if (!sOpen){
+		      fd = serialOpen("/dev/ttyACM0", 115200);
+		      sOpen = 1;
+		    }
+		  }
+		    float bot_X = ((det->p[0][0] + det->p[1][0])/2);
+		    float bot_Y = ((det->p[0][1] + det->p[3][1])/2);
+		    float prop_x = bot_X < center_X ? -min_X/bot_X : bot_X/max_X;
+		    float prop_y = bot_Y > center_Y ? min_Y/bot_Y : -bot_Y/max_Y;
+		    prop_x += 1; // range from 0-2
+		    prop_y += 1; // range from 0-2
+		    prop_x *= 1000; // convert from decimal to int
+		    prop_y += 1000; // convert from decimal to int
+		    printf("%d %d\n", (int)floor(prop_x), (int)floor(prop_y));
+		    
+		    sprintf(charX, "%d", (int)floor(prop_x));
+		    sprintf(charY, "%d", (int)floor(prop_y));
+		    sprintf(data, "%s %s", charX, charY);
+		    printf("%s", data);
+                    serialPuts(fd, data);
+		  
+		}
                 // Draw onto the frame
                 line(frame, Point(det->p[0][0], det->p[0][1]),
                          Point(det->p[1][0], det->p[1][1]),
@@ -294,7 +327,7 @@ int main(int argc, char** argv) {
             it++;
         }
         printf("==============================================\n");
-    
+	    
 
         key = waitKey(16);
     }

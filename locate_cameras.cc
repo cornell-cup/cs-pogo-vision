@@ -15,6 +15,8 @@ using std::vector;
 
 #define TAG_SIZE 6.5f
 
+// locate origin based only on bottom left tag; don't need to calc inches anymore.
+
 int main(int argc, char** argv) {
     // Display usage
     if (argc < 2) {

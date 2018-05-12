@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
                 // Get the ith detection
                 apriltag_detection_t *det;
                 zarray_get(init_detections, j, &det);
-                if ((det->id) == 11 || (det->id) == 7 || (det->id) == 8 || (det->id) == 9) {
+                if ((det->id) == 1 || (det->id) == 5 || (det->id) == 3 || (det->id) == 2) {
 		    line(frame, Point(det->p[0][0], det->p[0][1]),
                             Point(det->p[1][0], det->p[1][1]),
                             Scalar(0, 0xff, 0), 2);
@@ -177,7 +177,10 @@ int main(int argc, char** argv) {
 
 
             if (key == 'x'){
-
+	    min_X -= 7;
+	    max_X += 7;
+	    min_Y -= 7;
+	    max_Y += 7;
             std::ofstream fout;
             fout.open("crop.calib", std::ofstream::out);
             fout << min_X << " " << min_Y << " " << max_X << " " << max_Y;

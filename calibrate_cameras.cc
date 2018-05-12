@@ -56,12 +56,7 @@ int main(int argc, char** argv) {
     float max_Y;
     float min_X;
     float min_Y;
-    std::ifstream infile("crop.calib");
-    infile >> min_X;
-    infile >> min_Y;
-    infile >> max_X;
-    infile >> max_Y;
-    infile.close();
+
     Mat frame, gray;
     Mat cframe, img;
     vector<Point2f> corners;
@@ -71,10 +66,8 @@ int main(int argc, char** argv) {
                 continue;
             }
 
-            devices[i] >> cframe;
-	    img = cframe.clone();
-            Rect roi = Rect(floor(min_X), floor(min_Y), floor(max_X - min_X), floor(max_Y - min_Y));
-	    frame = img(roi);
+            devices[i] >> frame;
+
             // Detect checkerboards on spacebar
             if (waitKey(1) == 32) {
                 cvtColor(frame, gray, COLOR_BGR2GRAY);
