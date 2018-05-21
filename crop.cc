@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
                 // Get the ith detection
                 apriltag_detection_t *det;
                 zarray_get(init_detections, j, &det);
-                if ((det->id) == 1 || (det->id) == 5 || (det->id) == 3 || (det->id) == 2) {
+                if ((det->id) == 1 || (det->id) == 0 || (det->id) == 3 || (det->id) == 10) {
 		    line(frame, Point(det->p[0][0], det->p[0][1]),
                             Point(det->p[1][0], det->p[1][1]),
                             Scalar(0, 0xff, 0), 2);
