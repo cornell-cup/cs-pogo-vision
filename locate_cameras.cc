@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
                 // Get the ith detection
                 apriltag_detection_t *det;
                 zarray_get(detections, j, &det);
-                if ((det -> id) <= 3) {
+                if ((det->id) == 1 || (det->id) == 0 || (det->id) == 3 || (det->id) == 10) {
                     int id = det -> id;
                     // Draw onto the frame
                     line(frame, Point(det->p[0][0], det->p[0][1]),

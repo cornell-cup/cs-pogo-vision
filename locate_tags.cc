@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
         device_transform_matrix.push_back(transform_matrix);
     }
     // Initialize detector
-    apriltag_family_t* tf = tag36h11_create();
+    apriltag_family_t* tf = tag16h5_create();
     tf->black_border = 1;
     apriltag_detector_t* td = apriltag_detector_create();
     apriltag_detector_add_family(td, tf);
@@ -194,7 +194,7 @@ int main(int argc, char** argv) {
                 // Get the ith detection
                 apriltag_detection_t *det;
                 zarray_get(detections, j, &det);
-		if ((det->id) == 0){
+		if ((det->id) == 6){
 		  if ((fd = serialOpen("/dev/ttyACM0", 115200)) < 0){
     		    fprintf(stderr, "Unable to open serial device: %s\n", strerror (errno));
 		    }
@@ -210,13 +210,15 @@ int main(int argc, char** argv) {
 		    float prop_y = bot_Y > center_Y ? min_Y/bot_Y : -bot_Y/max_Y;
 		    prop_x += 1; // range from 0-2
 		    prop_y += 1; // range from 0-2
-		    prop_x *= 1000; // convert from decimal to int
-		    prop_y += 1000; // convert from decimal to int
+		    prop_x *= 100; // convert from decimal to int
+		    prop_y *= 100; // convert from decimal to int
 		    printf("%d %d\n", (int)floor(prop_x), (int)floor(prop_y));
 		    
 		    sprintf(charX, "%d", (int)floor(prop_x));
 		    sprintf(charY, "%d", (int)floor(prop_y));
-		    sprintf(data, "%s %s", charX, charY);
+		    //sprintf(charX, "%d", (int)20);
+		    //sprintf(charY, "%d", (int)30);
+		    sprintf(data, "%s%s", charX, charY);
 		    printf("%s", data);
                     serialPuts(fd, data);
 		  
